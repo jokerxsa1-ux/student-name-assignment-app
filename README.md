@@ -41,6 +41,10 @@ npm run build
 
 ### GitHub Pages
 
+公開URL: https://jokerxsa1-ux.github.io/student-name-assignment-app/
+
+ソースコード: https://github.com/jokerxsa1-ux/student-name-assignment-app
+
 このリポジトリには`.github/workflows/deploy-pages.yml`が含まれています。`main`ブランチへpushすると、次を順番に実行し、すべて成功した場合だけGitHub Pagesへ公開します。
 
 1. 依存パッケージの固定インストール
