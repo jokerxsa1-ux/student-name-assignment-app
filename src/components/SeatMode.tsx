@@ -2,7 +2,7 @@ import { DndContext, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor
 import { useMemo, useState } from 'react';
 import { appConfig } from '../appConfig';
 import type { SeatModeState } from '../app/appState';
-import { assignSeats, createSeatHistory, createSeats, evaluateSeatAssignment } from '../domain/assignment';
+import { assignSeats, createSeatHistory, createSeats, evaluateSeatAssignment, sameSeatPlacement } from '../domain/assignment';
 import { displayName } from '../domain/roster';
 import type { SeatHistoryEntry, Student } from '../domain/types';
 import { DraggableName, DroppableArea } from './DndPrimitives';
@@ -25,6 +25,12 @@ export function SeatMode({ students, state, history, onChange, onRecordHistory }
   const studentById = useMemo(() => new Map(students.map((student) => [student.id, student])), [students]);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), useSensor(KeyboardSensor));
   const enabledSeats = state.seats.filter((seat) => seat.enabled);
+  const currentHistoryEntry = useMemo(
+    () => state.result ? createSeatHistory(state.result, state.seats) : undefined,
+    [state.result, state.seats],
+  );
+  const currentPlacementRecorded = Boolean(currentHistoryEntry && history.some((entry) =>
+    sameSeatPlacement(entry.placementByStudent, currentHistoryEntry.placementByStudent)));
 
   const setDimensions = (rows: number, columns: number) => {
     const nextRows = Math.max(1, Math.min(appConfig.maxRows, rows));
@@ -58,9 +64,13 @@ export function SeatMode({ students, state, history, onChange, onRecordHistory }
     const sourceSeatId = Object.entries(state.result.assignmentBySeat).find(([, id]) => id === studentId)?.[0];
     if (!sourceSeatId || !state.result.assignmentBySeat.hasOwnProperty(targetSeatId) || sourceSeatId === targetSeatId) return;
     const fixedSeat = state.constraints.fixedByStudent[studentId];
-    if (fixedSeat && fixedSeat !== targetSeatId && !window.confirm('固定席から移動します。条件違反として表示されますが、移動しますか？')) return;
     const assignmentBySeat = { ...state.result.assignmentBySeat };
     const targetStudent = assignmentBySeat[targetSeatId];
+    const targetStudentFixedHere = Boolean(targetStudent && state.constraints.fixedByStudent[targetStudent] === targetSeatId);
+    if (
+      ((fixedSeat && fixedSeat !== targetSeatId) || targetStudentFixedHere) &&
+      !window.confirm('固定席の生徒が移動します。条件違反として表示されますが、入れ替えますか？')
+    ) return;
     assignmentBySeat[targetSeatId] = studentId;
     assignmentBySeat[sourceSeatId] = targetStudent;
     const evaluation = evaluateSeatAssignment(assignmentBySeat, students, state.seats, state.constraints, history);
@@ -174,11 +184,12 @@ export function SeatMode({ students, state, history, onChange, onRecordHistory }
               <button
                 type="button"
                 className={styles.secondaryButton}
+                disabled={currentPlacementRecorded}
                 onClick={() => {
-                  onRecordHistory(createSeatHistory(state.result!, state.seats));
+                  onRecordHistory(currentHistoryEntry!);
                   setNotice('この配置を席履歴へ登録しました。');
                 }}
-              >この配置を履歴へ登録</button>
+              >{currentPlacementRecorded ? 'この配置は登録済み' : 'この配置を履歴へ登録'}</button>
               <button type="button" className={styles.printButton} onClick={() => window.print()}>印刷・PDF保存</button>
             </div>
           </>

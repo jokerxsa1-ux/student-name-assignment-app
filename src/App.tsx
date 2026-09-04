@@ -7,6 +7,7 @@ import { HistoryPanel } from './components/HistoryPanel';
 import { OrderMode } from './components/OrderMode';
 import { RosterPanel } from './components/RosterPanel';
 import { SeatMode } from './components/SeatMode';
+import { sameSeatPlacement } from './domain/assignment';
 import type { Mode, PersistedHistoryPayload, SeatHistoryEntry, Student } from './domain/types';
 import {
   decryptHistory,
@@ -139,7 +140,10 @@ export default function App() {
   const recordHistory = (entry: SeatHistoryEntry) => {
     updateProject((current) => ({
       ...current,
-      seatHistory: [entry, ...current.seatHistory].slice(0, appConfig.historyLimit),
+      seatHistory: [
+        entry,
+        ...current.seatHistory.filter((history) => !sameSeatPlacement(history.placementByStudent, entry.placementByStudent)),
+      ].slice(0, appConfig.historyLimit),
     }));
   };
 
@@ -252,7 +256,10 @@ export default function App() {
         </>
       )}
 
-      <footer className={styles.appFooter}>入力内容はこのブラウザ内で処理されます。共有端末では、利用後に全データを削除してください。</footer>
+      <footer className={styles.appFooter}>
+        入力内容はこのブラウザ内で処理されます。共有端末では、利用後に全データを削除してください。
+        <span>バージョン {appConfig.version}</span>
+      </footer>
     </div>
   );
 }

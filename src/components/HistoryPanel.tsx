@@ -43,8 +43,11 @@ export function HistoryPanel({ hasSavedData, unlocked, busy, historyCount, onEna
         </div>
       </div>
       <div className={styles.historySummary}>
-        <strong>席履歴は現在{historyCount}件です。</strong>
+        {hasSavedData && !unlocked
+          ? <strong>保存データはロックされています。</strong>
+          : <strong>席履歴は現在{historyCount}件です。</strong>}
         <span>同じ席はこれまでの配置と似ていない配置をランダムで作ります。</span>
+        {hasSavedData && !unlocked && <span>保存した名簿を開くと、席履歴の件数を確認できます。</span>}
       </div>
       {!hasSavedData && !unlocked && (
         <div className={styles.infoBox}>

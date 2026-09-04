@@ -5,6 +5,7 @@ import {
   assignSeats,
   createSeats,
   evaluateSeatAssignment,
+  sameSeatPlacement,
 } from './assignment';
 import type { GroupConstraints, SeatConstraints, SeatHistoryEntry, Student } from './types';
 
@@ -96,6 +97,17 @@ describe('席替え', () => {
       constraints,
     );
     expect(evaluation.violations.some((item) => item.kind === 'fixed')).toBe(true);
+  });
+
+  it('生徒ごとの座標が同じ履歴を同一配置と判定する', () => {
+    expect(sameSeatPlacement(
+      { s1: { row: 0, column: 0 }, s2: { row: 1, column: 1 } },
+      { s2: { row: 1, column: 1 }, s1: { row: 0, column: 0 } },
+    )).toBe(true);
+    expect(sameSeatPlacement(
+      { s1: { row: 0, column: 0 } },
+      { s1: { row: 0, column: 1 } },
+    )).toBe(false);
   });
 });
 

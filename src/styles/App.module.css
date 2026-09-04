@@ -271,6 +271,7 @@ select option { color: #fffdf0; background: #123b30; }
 .emptyResult { color: rgba(255,253,240,.6); }
 .emptyResult span { color: rgba(255,253,240,.32); }
 .appFooter { color: rgba(255,253,240,.65); background: rgba(3,25,19,.45); border-color: rgba(255,253,240,.25); }
+.appFooter span { display: block; margin-top: 5px; color: rgba(255,253,240,.48); font-size: .7rem; }
 
 @media (max-width: 1180px) {
   .modeLayout { grid-template-columns: 1fr; }

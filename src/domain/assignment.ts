@@ -191,6 +191,19 @@ export function createSeatHistory(result: SeatAssignmentResult, seats: readonly 
   return { id: createInternalId(), createdAt: new Date().toISOString(), placementByStudent };
 }
 
+export function sameSeatPlacement(
+  first: SeatHistoryEntry['placementByStudent'],
+  second: SeatHistoryEntry['placementByStudent'],
+): boolean {
+  const firstIds = Object.keys(first);
+  const secondIds = Object.keys(second);
+  return firstIds.length === secondIds.length && firstIds.every((studentId) => {
+    const a = first[studentId];
+    const b = second[studentId];
+    return Boolean(a && b && a.row === b.row && a.column === b.column);
+  });
+}
+
 export function assignGroups(
   students: readonly Student[],
   groupIds: readonly GroupId[],
