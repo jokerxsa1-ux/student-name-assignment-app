@@ -18,6 +18,7 @@ import {
 import styles from './styles/App.module.css';
 
 export default function App() {
+  const [page, setPage] = useState<'roster' | 'assignment'>('roster');
   const [mode, setMode] = useState<Mode>('seats');
   const { project, updateProject, replaceProject, undo, redo, canUndo, canRedo } = useUndoableProject();
   const [hasSavedData, setHasSavedData] = useState(false);
@@ -150,9 +151,11 @@ export default function App() {
           <h1>{appConfig.appName}</h1>
           <p>名簿を貼り付けて、席・グループ・順番をすぐに作成できます。</p>
         </div>
-        <div className={styles.undoControls} aria-label="操作履歴">
-          <button type="button" onClick={undo} disabled={!canUndo}>元に戻す</button>
-          <button type="button" onClick={redo} disabled={!canRedo}>やり直す</button>
+        <div className={styles.headerActions}>
+          <div className={styles.undoControls} aria-label="操作履歴">
+            <button type="button" onClick={undo} disabled={!canUndo}>元に戻す</button>
+            <button type="button" onClick={redo} disabled={!canRedo}>やり直す</button>
+          </div>
         </div>
       </header>
 
@@ -161,62 +164,93 @@ export default function App() {
         <p>{appConfig.privacyNotice}</p>
       </div>
 
-      <nav className={styles.modeTabs} aria-label="割り当てモード">
+      <nav className={styles.pageTabs} aria-label="ページ">
         {([
-          ['seats', '席替え', '▦'],
-          ['groups', 'グループ分け', '◫'],
-          ['order', '順番決め', '≡'],
-        ] as const).map(([value, label, icon]) => (
-          <button key={value} type="button" className={mode === value ? styles.activeTab : ''} aria-current={mode === value ? 'page' : undefined} onClick={() => setMode(value)}>
-            <span aria-hidden="true">{icon}</span>{label}
+          ['roster', '1. 名簿登録'],
+          ['assignment', '2. 割り当て'],
+        ] as const).map(([value, label]) => (
+          <button key={value} type="button" className={page === value ? styles.activePageTab : ''} aria-current={page === value ? 'page' : undefined} onClick={() => setPage(value)}>
+            {label}
           </button>
         ))}
       </nav>
 
-      <div className={styles.workspace}>
-        <aside className={styles.rosterColumn}>
-          <RosterPanel students={project.students} dummyDataLoaded={project.dummyDataLoaded} onChange={changeRoster} />
-          <HistoryPanel
-            hasSavedData={hasSavedData}
-            unlocked={Boolean(historyPassphrase)}
-            busy={historyBusy}
-            historyCount={project.seatHistory.length}
-            onEnable={enableHistory}
-            onUnlock={unlockHistory}
-            onLock={() => {
-              setHistoryPassphrase('');
-              setSaveStatus('暗号化履歴をロックしました。');
-            }}
-            onDelete={deleteHistory}
-          />
-          {saveStatus && <p className={styles.saveStatus} aria-live="polite">{saveStatus}</p>}
-        </aside>
-        <main className={styles.modeColumn}>
-          {mode === 'seats' && (
-            <SeatMode
-              students={project.students}
-              state={project.seats}
-              history={project.seatHistory}
-              onChange={(seats) => updateProject((current) => ({ ...current, seats }))}
-              onRecordHistory={recordHistory}
-            />
-          )}
-          {mode === 'groups' && (
-            <GroupMode
-              students={project.students}
-              state={project.groups}
-              onChange={(groups) => updateProject((current) => ({ ...current, groups }))}
-            />
-          )}
-          {mode === 'order' && (
-            <OrderMode
-              students={project.students}
-              state={project.order}
-              onChange={(order) => updateProject((current) => ({ ...current, order }))}
-            />
-          )}
+      {page === 'roster' ? (
+        <main className={styles.rosterPage}>
+          <div className={styles.pageIntroduction}>
+            <p className={styles.eyebrow}>STEP 1</p>
+            <h2>名簿をつくる</h2>
+            <p>生徒名を登録し、必要であればこの端末へ暗号化して保存します。</p>
+          </div>
+          <div className={styles.rosterPageGrid}>
+            <RosterPanel students={project.students} dummyDataLoaded={project.dummyDataLoaded} onChange={changeRoster} />
+            <div className={styles.historyColumn}>
+              <HistoryPanel
+                hasSavedData={hasSavedData}
+                unlocked={Boolean(historyPassphrase)}
+                busy={historyBusy}
+                historyCount={project.seatHistory.length}
+                onEnable={enableHistory}
+                onUnlock={unlockHistory}
+                onLock={() => {
+                  setHistoryPassphrase('');
+                  setSaveStatus('暗号化履歴をロックしました。');
+                }}
+                onDelete={deleteHistory}
+              />
+              {saveStatus && <p className={styles.saveStatus} aria-live="polite">{saveStatus}</p>}
+            </div>
+          </div>
+          <div className={styles.nextStepBar}>
+            <div>
+              <strong>対象 {project.students.filter((student) => !student.excluded).length}人</strong>
+              <span>名簿の準備ができたら割り当てへ進みます。</span>
+            </div>
+            <button type="button" className={styles.nextStepButton} disabled={!project.students.length} onClick={() => setPage('assignment')}>
+              割り当てへ進む →
+            </button>
+          </div>
         </main>
-      </div>
+      ) : (
+        <>
+          <nav className={styles.modeTabs} aria-label="割り当てモード">
+            {([
+              ['seats', '席替え', '▦'],
+              ['groups', 'グループ分け', '◫'],
+              ['order', '順番決め', '≡'],
+            ] as const).map(([value, label, icon]) => (
+              <button key={value} type="button" className={mode === value ? styles.activeTab : ''} aria-current={mode === value ? 'page' : undefined} onClick={() => setMode(value)}>
+                <span aria-hidden="true">{icon}</span>{label}
+              </button>
+            ))}
+          </nav>
+          <main className={styles.assignmentWorkspace}>
+            {mode === 'seats' && (
+              <SeatMode
+                students={project.students}
+                state={project.seats}
+                history={project.seatHistory}
+                onChange={(seats) => updateProject((current) => ({ ...current, seats }))}
+                onRecordHistory={recordHistory}
+              />
+            )}
+            {mode === 'groups' && (
+              <GroupMode
+                students={project.students}
+                state={project.groups}
+                onChange={(groups) => updateProject((current) => ({ ...current, groups }))}
+              />
+            )}
+            {mode === 'order' && (
+              <OrderMode
+                students={project.students}
+                state={project.order}
+                onChange={(order) => updateProject((current) => ({ ...current, order }))}
+              />
+            )}
+          </main>
+        </>
+      )}
 
       <footer className={styles.appFooter}>入力内容はこのブラウザ内で処理されます。共有端末では、利用後に全データを削除してください。</footer>
     </div>

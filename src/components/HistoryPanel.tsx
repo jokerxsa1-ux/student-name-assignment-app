@@ -34,9 +34,18 @@ export function HistoryPanel({ hasSavedData, unlocked, busy, historyCount, onEna
   };
 
   return (
-    <details className={styles.historyPanel}>
-      <summary>直近2回の席履歴・端末内保存</summary>
-      <p>席履歴は現在{historyCount}件です。同じ席は2点、隣接席は1点として、通常条件を守れる候補の中から似ていない配置を選びます。</p>
+    <section className={styles.historyPanel} aria-labelledby="device-save-heading">
+      <div className={styles.saveHeading}>
+        <span className={styles.saveIcon} aria-hidden="true">▣</span>
+        <div>
+          <p className={styles.eyebrow}>この端末だけに保存</p>
+          <h2 id="device-save-heading">端末内保存</h2>
+        </div>
+      </div>
+      <div className={styles.historySummary}>
+        <strong>席履歴は現在{historyCount}件です。</strong>
+        <span>同じ席はこれまでの配置と似ていない配置をランダムで作ります。</span>
+      </div>
       {!hasSavedData && !unlocked && (
         <div className={styles.infoBox}>
           <strong>端末内保存は任意です</strong>
@@ -68,7 +77,7 @@ export function HistoryPanel({ hasSavedData, unlocked, busy, historyCount, onEna
             </label>
           )}
           <button type="button" className={styles.secondaryButton} disabled={busy || !passphrase} onClick={() => void submit()}>
-            {busy ? '処理中…' : hasSavedData ? '保存履歴を開く' : '暗号化保存を有効にする'}
+            {busy ? '処理中…' : hasSavedData ? '保存した名簿を開く' : 'この端末に保存する'}
           </button>
           {error && <p className={styles.fieldError} role="alert">{error}</p>}
         </div>
@@ -83,6 +92,6 @@ export function HistoryPanel({ hasSavedData, unlocked, busy, historyCount, onEna
         >開かずに削除</button>
       )}
       <p className={styles.mutedText}>パスフレーズは保存されません。忘れた場合、履歴は復元できません。</p>
-    </details>
+    </section>
   );
 }
