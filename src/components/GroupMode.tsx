@@ -9,6 +9,7 @@ import { PairEditor } from './PairEditor';
 import { ResultMessages } from './ResultMessages';
 import { EmptyResult, PrintControls } from './SeatMode';
 import styles from '../styles/App.module.css';
+import { NumberField } from './NumberField';
 
 interface Props {
   students: Student[];
@@ -75,7 +76,7 @@ export function GroupMode({ students, state, onChange }: Props) {
         <p className={styles.eyebrow}>グループ分け</p>
         <h2 id="group-settings-heading">グループと条件</h2>
         <div className={styles.dimensionRow}>
-          <label>グループ数<input type="number" min="1" max="20" value={state.count} onChange={(event) => setCount(Number(event.target.value))} /></label>
+          <NumberField label="グループ数" min={1} max={20} value={state.count} onCommit={setCount} />
           <button type="button" className={styles.smallButton} onClick={() => setCount(6)}>6グループ</button>
         </div>
         <p className={styles.counterLine}>

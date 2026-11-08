@@ -6,6 +6,7 @@ import { assignSeats, createSeatHistory, createSeats, evaluateSeatAssignment, sa
 import { displayName } from '../domain/roster';
 import type { SeatHistoryEntry, Student } from '../domain/types';
 import { DraggableName, DroppableArea } from './DndPrimitives';
+import { NumberField } from './NumberField';
 import { PairEditor } from './PairEditor';
 import { ResultMessages } from './ResultMessages';
 import styles from '../styles/App.module.css';
@@ -83,9 +84,9 @@ export function SeatMode({ students, state, history, onChange, onRecordHistory }
         <p className={styles.eyebrow}>席替え</p>
         <h2 id="seat-settings-heading">座席と条件</h2>
         <div className={styles.dimensionRow}>
-          <label>前後の行数<input type="number" min="1" max={appConfig.maxRows} value={state.rows} onChange={(event) => setDimensions(Number(event.target.value), state.columns)} /></label>
+          <NumberField label="前後の行数" min={1} max={appConfig.maxRows} value={state.rows} onCommit={(rows) => setDimensions(rows, state.columns)} />
           <span>×</span>
-          <label>左右の列数<input type="number" min="1" max={appConfig.maxColumns} value={state.columns} onChange={(event) => setDimensions(state.rows, Number(event.target.value))} /></label>
+          <NumberField label="左右の列数" min={1} max={appConfig.maxColumns} value={state.columns} onCommit={(columns) => setDimensions(state.rows, columns)} />
           <button type="button" className={styles.smallButton} onClick={() => setDimensions(5, 6)}>5×6</button>
         </div>
         <p className={styles.counterLine}>対象 {active.length}人 / 有効席 {enabledSeats.length}席</p>
