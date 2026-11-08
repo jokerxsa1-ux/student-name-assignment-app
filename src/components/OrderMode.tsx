@@ -72,7 +72,7 @@ export function OrderMode({ students, state, onChange }: Props) {
 
       <section className={`${styles.panel} ${styles.resultPanel} ${styles.portraitPrint}`} aria-labelledby="order-result-heading">
         <div className={styles.resultHeader}><div><p className={styles.eyebrow}>割り当て結果</p><h2 id="order-result-heading">順番</h2></div></div>
-        {notice && <p className={styles.successMessage} aria-live="polite">{notice}</p>}
+        {notice && state.result && <p className={styles.successMessage} aria-live="polite">{notice}</p>}
         {state.result ? (
           <>
             <PrintControls title={state.printTitle} date={state.printDate} onChange={(values) => onChange({ ...state, ...values })} />

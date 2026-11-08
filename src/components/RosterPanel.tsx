@@ -78,12 +78,9 @@ export function RosterPanel({ students, dummyDataLoaded, onChange }: Props) {
         <div className={styles.rosterList} aria-label="生徒一覧">
           {students.map((student) => (
             <div className={`${styles.rosterRow} ${student.excluded ? styles.excludedRow : ''}`} key={student.id}>
-              <input
-                aria-label={`${student.name}の名前`}
-                value={student.name}
-                onChange={(event) => onChange(students.map((item) => item.id === student.id ? { ...item, name: event.target.value } : item), false)}
-                autoComplete="off"
-                spellCheck={false}
+              <NameInput
+                name={student.name}
+                onCommit={(name) => onChange(students.map((item) => item.id === student.id ? { ...item, name } : item), false)}
               />
               <label className={styles.checkboxLabel}>
                 <input
@@ -121,5 +118,37 @@ export function RosterPanel({ students, dummyDataLoaded, onChange }: Props) {
         >全データ削除</button>
       )}
     </section>
+  );
+}
+
+/** 名前の編集欄。空欄の間は名簿へ反映せず、空欄のまま離れると元の名前に戻す。 */
+function NameInput({ name, onCommit }: { name: string; onCommit: (name: string) => void }) {
+  const [draft, setDraft] = useState(name);
+  const [syncedName, setSyncedName] = useState(name);
+  if (name !== syncedName) {
+    setSyncedName(name);
+    setDraft(name);
+  }
+  return (
+    <input
+      aria-label={`${name}の名前`}
+      value={draft}
+      onChange={(event) => {
+        const text = event.target.value;
+        setDraft(text);
+        if (text.trim() && text !== name) {
+          setSyncedName(text);
+          onCommit(text);
+        }
+      }}
+      onBlur={() => {
+        const trimmed = draft.trim();
+        if (!trimmed) setDraft(name);
+        else if (trimmed !== name) onCommit(trimmed);
+        else if (draft !== name) setDraft(name);
+      }}
+      autoComplete="off"
+      spellCheck={false}
+    />
   );
 }

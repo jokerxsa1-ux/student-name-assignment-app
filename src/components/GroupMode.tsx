@@ -9,6 +9,7 @@ import { PairEditor } from './PairEditor';
 import { ResultMessages } from './ResultMessages';
 import { EmptyResult, PrintControls } from './SeatMode';
 import styles from '../styles/App.module.css';
+import { NumberField } from './NumberField';
 
 interface Props {
   students: Student[];
@@ -75,7 +76,7 @@ export function GroupMode({ students, state, onChange }: Props) {
         <p className={styles.eyebrow}>グループ分け</p>
         <h2 id="group-settings-heading">グループと条件</h2>
         <div className={styles.dimensionRow}>
-          <label>グループ数<input type="number" min="1" max="20" value={state.count} onChange={(event) => setCount(Number(event.target.value))} /></label>
+          <NumberField label="グループ数" min={1} max={20} value={state.count} onCommit={setCount} />
           <button type="button" className={styles.smallButton} onClick={() => setCount(6)}>6グループ</button>
         </div>
         <p className={styles.counterLine}>
@@ -123,7 +124,7 @@ export function GroupMode({ students, state, onChange }: Props) {
           <div><p className={styles.eyebrow}>割り当て結果</p><h2 id="group-result-heading">グループ</h2></div>
           {state.result && <span className={styles.attemptBadge}>{state.result.attempts}回探索</span>}
         </div>
-        {notice && <p className={styles.successMessage} aria-live="polite">{notice}</p>}
+        {notice && state.result && <p className={styles.successMessage} aria-live="polite">{notice}</p>}
         {state.result ? (
           <>
             <PrintControls title={state.printTitle} date={state.printDate} onChange={(values) => onChange({ ...state, ...values })} />

@@ -88,6 +88,7 @@ export default function App() {
 
   const changeRoster = (students: Student[], dummyDataLoaded = false) => {
     updateProject((current) => {
+      if (onlyNamesChanged(current.students, students)) return { ...current, students, dummyDataLoaded };
       const next = sanitizeProjectForRoster(current, students);
       return { ...next, dummyDataLoaded, seatHistory: students.length ? next.seatHistory : [] };
     });
@@ -107,6 +108,10 @@ export default function App() {
   };
 
   const unlockHistory = async (passphrase: string) => {
+    if (
+      project.students.length &&
+      !window.confirm('今の名簿・条件・結果を、保存した名簿で置き換えます。置き換えた後は「元に戻す」で戻せません。よろしいですか？')
+    ) return;
     setHistoryBusy(true);
     try {
       const record = await loadEncryptedHistory();
@@ -262,6 +267,11 @@ export default function App() {
       </footer>
     </div>
   );
+}
+
+function onlyNamesChanged(previous: readonly Student[], next: readonly Student[]): boolean {
+  return previous.length === next.length &&
+    previous.every((student, index) => student.id === next[index].id && student.excluded === next[index].excluded);
 }
 
 function createPersistedPayload(project: ProjectState): PersistedHistoryPayload {

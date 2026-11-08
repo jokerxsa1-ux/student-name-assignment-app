@@ -76,6 +76,7 @@ export function createInitialProject(): ProjectState {
 
 export function sanitizeProjectForRoster(project: ProjectState, students: Student[]): ProjectState {
   const ids = new Set(students.map((student) => student.id));
+  const activeIds = new Set(students.filter((student) => !student.excluded).map((student) => student.id));
   const filterRecord = <T,>(record: Record<string, T>) =>
     Object.fromEntries(Object.entries(record).filter(([studentId]) => ids.has(studentId)));
   const filterPairs = <T extends { studentAId: string; studentBId: string }>(pairs: T[]) =>
@@ -104,10 +105,10 @@ export function sanitizeProjectForRoster(project: ProjectState, students: Studen
     order: {
       ...project.order,
       constraints: {
-        firstStudentId: ids.has(project.order.constraints.firstStudentId ?? '')
+        firstStudentId: activeIds.has(project.order.constraints.firstStudentId ?? '')
           ? project.order.constraints.firstStudentId
           : undefined,
-        lastStudentId: ids.has(project.order.constraints.lastStudentId ?? '')
+        lastStudentId: activeIds.has(project.order.constraints.lastStudentId ?? '')
           ? project.order.constraints.lastStudentId
           : undefined,
       },
