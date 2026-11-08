@@ -124,7 +124,7 @@ export function GroupMode({ students, state, onChange }: Props) {
           <div><p className={styles.eyebrow}>割り当て結果</p><h2 id="group-result-heading">グループ</h2></div>
           {state.result && <span className={styles.attemptBadge}>{state.result.attempts}回探索</span>}
         </div>
-        {notice && <p className={styles.successMessage} aria-live="polite">{notice}</p>}
+        {notice && state.result && <p className={styles.successMessage} aria-live="polite">{notice}</p>}
         {state.result ? (
           <>
             <PrintControls title={state.printTitle} date={state.printDate} onChange={(values) => onChange({ ...state, ...values })} />

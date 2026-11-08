@@ -98,7 +98,14 @@ export function SeatMode({ students, state, history, onChange, onRecordHistory }
               key={seat.id}
               className={seat.enabled ? styles.setupSeat : styles.disabledSeat}
               aria-pressed={!seat.enabled}
-              onClick={() => onChange({ ...state, seats: state.seats.map((item) => item.id === seat.id ? { ...item, enabled: !item.enabled } : item), result: undefined })}
+              onClick={() => onChange({
+                ...state,
+                seats: state.seats.map((item) => item.id === seat.id ? { ...item, enabled: !item.enabled } : item),
+                constraints: seat.enabled
+                  ? { ...state.constraints, fixedByStudent: Object.fromEntries(Object.entries(state.constraints.fixedByStudent).filter(([, seatId]) => seatId !== seat.id)) }
+                  : state.constraints,
+                result: undefined,
+              })}
             >{seat.enabled ? `${seat.row + 1}-${seat.column + 1}` : '使用しない'}</button>
           ))}
         </div>
@@ -157,7 +164,7 @@ export function SeatMode({ students, state, history, onChange, onRecordHistory }
           <div><p className={styles.eyebrow}>割り当て結果</p><h2 id="seat-result-heading">座席表</h2></div>
           {state.result && <span className={styles.attemptBadge}>{state.result.attempts}回探索</span>}
         </div>
-        {notice && <p className={styles.successMessage} aria-live="polite">{notice}</p>}
+        {notice && state.result && <p className={styles.successMessage} aria-live="polite">{notice}</p>}
         {state.result ? (
           <>
             <PrintControls title={state.printTitle} date={state.printDate} onChange={(values) => onChange({ ...state, ...values })} />
